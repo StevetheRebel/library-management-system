@@ -60,23 +60,26 @@ const prisma = new PrismaClient({
 // uses ID to link the books
 
 async function seed() {
-  await prisma.$transaction(async (db) => {
-    for (const { name, books } of catalog) {
-      const genre = await db.genre.upsert({
-        where: { name },
-        update: {},
-        create: { name },
-      });
-
-      for (const { title, author } of books) {
-        await db.book.upsert({
-          where: { title_author: { title, author } },
-          update: { genreId: genre.id },
-          create: { title, author, genreId: genre.id },
+  await prisma.$transaction(
+    async (db) => {
+      for (const { name, books } of catalog) {
+        const genre = await db.genre.upsert({
+          where: { name },
+          update: {},
+          create: { name },
         });
+
+        for (const { title, author } of books) {
+          await db.book.upsert({
+            where: { title_author: { title, author } },
+            update: { genreId: genre.id },
+            create: { title, author, genreId: genre.id },
+          });
+        }
       }
-    }
-  });
+    },
+    { timeout: 60_000 },
+  );
 }
 
 // runs the seed, reports failure and closes the database
