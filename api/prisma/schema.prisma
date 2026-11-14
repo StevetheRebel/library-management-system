@@ -1,7 +1,11 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "cjs"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,23 +18,40 @@ enum Role {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  role  Role   @default(PATRON)
+  id        Int       @id @default(autoincrement())
+  name      String  
+  email     String    @unique
+  password  String
+  role      Role      @default(PATRON)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Genre {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  books Book[]
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  description   String?
+
+  books         Book[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Book {
-  id      Int    @id @default(autoincrement())
-  title   String
-  author  String
-  genreId Int
-  genre   Genre  @relation(fields: [genreId], references: [id])
+  id            Int       @id @default(autoincrement())
+  title         String
+  author        String
+  isbn          String @unique
+  publishedYear Int?
+  totalCopies Int  @default(1)
+
+  genreId       Int
+  genre         Genre @relation(fields: [genreId], references: [id])
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([title, author])
+  @@index([genreId])
 }
